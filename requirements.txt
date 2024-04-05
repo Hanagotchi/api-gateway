@@ -1,0 +1,6 @@
+requests
+Werkzeug
+Flask
+flask_restful
+gunicorn
+PyJWT
