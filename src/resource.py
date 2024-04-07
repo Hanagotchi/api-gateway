@@ -1,4 +1,5 @@
-from flask import request, make_response
+import logging
+from flask import request, make_response  # type: ignore
 from flask_restful import Resource
 
 from src.apps.users import Users
@@ -24,7 +25,8 @@ SERVICE_MAP = {
     "device-plant": Measurements(),
     "plants": Plants(),
     "plant-type": Plants(),
-    "logs": Plants()
+    "logs": Plants(),
+    "login": Users()
 }
 
 
@@ -37,29 +39,34 @@ class Gateway(Resource):
     def get(self, url):
         resource = getCorrectEndpoint(url)
         if not resource:
+            logging.error(f"Resource not found for url {url}")
             return make_response({"message": "not found"}, 404)
         return resource.get(url, *getExtraData())
 
     def post(self, url):
         resource = getCorrectEndpoint(url)
         if not resource:
+            logging.error(f"Resource not found for url {url}")
             return make_response({"message": "not found"}, 404)
         return resource.post(url, *getExtraData())
 
     def patch(self, url):
         resource = getCorrectEndpoint(url)
         if not resource:
+            logging.error(f"Resource not found for url {url}")
             return make_response({"message": "not found"}, 404)
         return resource.patch(url, *getExtraData())
 
     def delete(self, url):
         resource = getCorrectEndpoint(url)
         if not resource:
+            logging.error(f"Resource not found for url {url}")
             return make_response({"message": "not found"}, 404)
         return resource.delete(url, *getExtraData())
 
     def put(self, url):
         resource = getCorrectEndpoint(url)
         if not resource:
+            logging.error(f"Resource not found for url {url}")
             return make_response({"message": "not found"}, 404)
         return resource.put(url, *getExtraData())

@@ -1,8 +1,8 @@
 import os
+import logging
 
 import requests
 from flask import make_response
-import sys
 
 
 def get_query_params(queryParam) -> str:
@@ -17,15 +17,14 @@ class Users:
 
     def getResponseJson(self, response):
         if response.status_code == 503 or not response.text:
-            return {"message": "users service currently unavailable,please"
+            return {"message": "users service is currently unavailable, please"
                     "try again later", "status": 503}
         return response.json()
 
     def get(self, url, body, headers, query_params):
         url = f"{self.host}{url}{get_query_params(query_params)}"
-        print(f"url: {url}")
-        sys.stdout.flush()
         response = requests.get(url, json=body, headers=headers)
+        logging.info(f"USERS | GET | {url}")
         return make_response(self.getResponseJson(response),
                              response.status_code)
 
@@ -34,6 +33,8 @@ class Users:
                                  f"{get_query_params(query_params)}",
                                  json=body,
                                  headers=headers)
+        logging.info(f"USERS | POST | {url}")
+        logging.debug(f"BODY: {body}")
         return make_response(self.getResponseJson(response),
                              response.status_code)
 
@@ -42,6 +43,8 @@ class Users:
                                   f"{get_query_params(query_params)}",
                                   json=body,
                                   headers=headers)
+        logging.info(f"USERS | PATCH | {url}")
+        logging.debug(f"BODY: {body}")
         return make_response(self.getResponseJson(response),
                              response.status_code)
 
@@ -49,5 +52,6 @@ class Users:
         response = requests.delete(f"{self.host}{url}"
                                    f"{get_query_params(query_params)}",
                                    headers=headers)
+        logging.info(f"USERS | DELETE | {url}")
         return make_response(self.getResponseJson(response),
                              response.status_code)
