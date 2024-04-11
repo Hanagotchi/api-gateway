@@ -12,6 +12,7 @@ def getExtraData():
         body = request.json
     else:
         body = {}
+    print(f"en get extract data headers: {request.headers}")
     headers = dict(request.headers)
     if 'Host' in headers:
         headers.pop('Host')  # Invalid header

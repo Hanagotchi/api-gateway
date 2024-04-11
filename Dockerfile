@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 5000
 
-CMD ["gunicorn", "wsgi:app", "-b", "0.0.0.0:5000"]
+CMD ["gunicorn", "wsgi:app", "--reload", "-b", "0.0.0.0:5000"]
