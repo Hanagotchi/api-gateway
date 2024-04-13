@@ -27,6 +27,7 @@ SERVICE_MAP = {
     "device-plant": Measurements(),
     "plants": Plants(),
     "plant-type": Plants(),
+    "plant-types": Plants(),
     "logs": Plants(),
     "login": Users(),
     # TODO: Add the new service
