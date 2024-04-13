@@ -27,7 +27,9 @@ SERVICE_MAP = {
     "plants": Plants(),
     "plant-type": Plants(),
     "logs": Plants(),
-    "login": Users()
+    "login": Users(),
+    # TODO: Add the new service
+    "socal": Measurements()
 }
 
 
