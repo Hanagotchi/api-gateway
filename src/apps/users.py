@@ -2,7 +2,6 @@ import http.client
 import os
 import logging
 import jwt
-import sys
 
 import requests
 from flask import make_response
@@ -29,17 +28,22 @@ def _get_token(headers: dict):
 
 def process_header(headers, body: dict) -> (dict, bool):
     token = _get_token(headers)
-    if not token and not (body and "user_id" in body):  # Check to not allow to bypass the token
+    if not token and not (body and "user_id" in body):
         return body, False
     newBody = body.copy() if body else {}
     try:
-        processToken = jwt.decode(token, key=os.getenv("HASH_SECRET"), algorithms=[os.getenv("HASH_ALGORITHM"), ])
+        processToken = jwt.decode(token, key=os.getenv("HASH_SECRET"),
+                                  algorithms=[os.getenv("HASH_ALGORITHM"), ])
         newBody["user_id"] = processToken.get("id", "")
         newBody["email"] = processToken.get("email")
     except jwt.ExpiredSignatureError:
-        return {"message": "expired token", "status": http.client.UNAUTHORIZED}, True
+        return {"message":
+                "expired token",
+                "status": http.client.UNAUTHORIZED}, True
     except jwt.InvalidTokenError:
-        return {"message": "invalid token", "status": http.client.FORBIDDEN}, True
+        return {"message":
+                "invalid token",
+                "status": http.client.FORBIDDEN}, True
     return newBody, False
 
 
@@ -61,26 +65,22 @@ class Users:
                              response.status_code)
 
     def post(self, url, body, headers, query_params):
-        print(f"URL: {url}")
-        sys.stdout.flush()
-        if not(url.startswith("login")):
-            print(f"NO ES UN CASO DE LOG IN !!!!!!! {url}")
-            sys.stdout.flush()
-            body, error = process_header(headers, body)
-            if error:
-                print(f"ES UN CASO DE ERROR(SEGUIMOS EN LOG IN'T ) !!!!!!! {url}")
-                sys.stdout.flush()
-                return make_response(body, body.get("status"))
+        # if not (url.startswith("login")):
+        #     body, error = process_header(headers, body)
+        #     if error:
+        #         return make_response(body, body.get("status"))
         response = requests.post(f"{self.host}{url}"
                                  f"{get_query_params(query_params)}",
                                  json=body,
                                  headers=headers)
         logging.info(f"USERS | POST | {url}")
         logging.debug(f"BODY: {body}")
-        print(f"headers: {headers}")
-        sys.stdout.flush()
-        return make_response(self.getResponseJson(response),
-                             response.status_code)
+        headers = dict(response.headers)
+        response = make_response(self.getResponseJson(response),
+                                 response.status_code)
+        if headers.get(TOKEN_FIELD_NAME):
+            response.headers[TOKEN_FIELD_NAME] = headers.get(TOKEN_FIELD_NAME)
+        return response
 
     def patch(self, url, body, headers, query_params):
         response = requests.patch(f"{self.host}{url}"

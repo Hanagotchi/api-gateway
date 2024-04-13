@@ -1,8 +1,6 @@
 import os
-import sys
 import logging
 from flask import Flask
-from flask import request
 from flask_restful import Api
 from werkzeug.routing import BaseConverter
 from src.resource import Gateway
@@ -35,10 +33,6 @@ class RegexConverter(BaseConverter):
 
 @app.after_request
 def _build_cors_post_response(response):
-    print(f"Headers(post response): {request.headers}")
-    sys.stdout.flush()
-    # if 'Origin' in request.headers:
-    #     response.headers.add("Access-Control-Allow-Origin", request.headers['Origin'])
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")
