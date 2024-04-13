@@ -5,6 +5,7 @@ from flask_restful import Resource
 from src.apps.users import Users
 from src.apps.measurements import Measurements
 from src.apps.plants import Plants
+from src.apps.social import Social
 
 
 def getExtraData():
@@ -29,7 +30,7 @@ SERVICE_MAP = {
     "logs": Plants(),
     "login": Users(),
     # TODO: Add the new service
-    "socal": Measurements()
+    "social": Social()
 }
 
 
