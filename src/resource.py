@@ -5,6 +5,7 @@ from flask_restful import Resource
 from src.apps.users import Users
 from src.apps.measurements import Measurements
 from src.apps.plants import Plants
+from src.apps.social import Social
 
 
 def getExtraData():
@@ -12,6 +13,7 @@ def getExtraData():
         body = request.json
     else:
         body = {}
+    print(f"en get extract data headers: {request.headers}")
     headers = dict(request.headers)
     if 'Host' in headers:
         headers.pop('Host')  # Invalid header
@@ -25,8 +27,11 @@ SERVICE_MAP = {
     "device-plant": Measurements(),
     "plants": Plants(),
     "plant-type": Plants(),
+    "plant-types": Plants(),
     "logs": Plants(),
-    "login": Users()
+    "login": Users(),
+    # TODO: Add the new service
+    "social": Social()
 }
 
 
