@@ -76,10 +76,13 @@ class Users:
         logging.info(f"USERS | POST | {url}")
         logging.debug(f"BODY: {body}")
         headers = dict(response.headers)
+        logging.info(f"TOKEN | {headers}")
         response = make_response(self.getResponseJson(response),
                                  response.status_code)
-        if headers.get(TOKEN_FIELD_NAME):
-            response.headers[TOKEN_FIELD_NAME] = headers.get(TOKEN_FIELD_NAME)
+        if headers.get(TOKEN_FIELD_NAME.title()):
+            response.headers[TOKEN_FIELD_NAME] = headers.get(
+                TOKEN_FIELD_NAME.title()
+            )
         return response
 
     def patch(self, url, body, headers, query_params):
