@@ -30,7 +30,6 @@ SERVICE_MAP = {
     "plant-types": Plants(),
     "logs": Plants(),
     "login": Users(),
-    # TODO: Add the new service
     "social": Social()
 }
 

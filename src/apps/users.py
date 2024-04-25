@@ -26,25 +26,24 @@ def _get_token(headers: dict):
     return headers.get(keyName)
 
 
-def process_header(headers, body: dict) -> (dict, bool):
+def process_header(headers):
     token = _get_token(headers)
-    if not token and not (body and "user_id" in body):
-        return body, False
-    newBody = body.copy() if body else {}
+    if not token:
+        return {"message":
+                "no token provided",
+                "status": http.client.UNAUTHORIZED}
     try:
-        processToken = jwt.decode(token, key=os.getenv("HASH_SECRET"),
-                                  algorithms=[os.getenv("HASH_ALGORITHM"), ])
-        newBody["user_id"] = processToken.get("id", "")
-        newBody["email"] = processToken.get("email")
+        jwt.decode(token, os.getenv("JWT_SECRET"),
+                   algorithms=[os.getenv("HASH_ALGORITHM"), ])
     except jwt.ExpiredSignatureError:
         return {"message":
                 "expired token",
-                "status": http.client.UNAUTHORIZED}, True
+                "status": http.client.UNAUTHORIZED}
     except jwt.InvalidTokenError:
         return {"message":
                 "invalid token",
-                "status": http.client.FORBIDDEN}, True
-    return newBody, False
+                "status": http.client.FORBIDDEN}
+    return None
 
 
 class Users:
@@ -59,16 +58,24 @@ class Users:
 
     def get(self, url, body, headers, query_params):
         url = f"{self.host}{url}{get_query_params(query_params)}"
+        token_error_response = process_header(headers)
+        if token_error_response:
+            return make_response(token_error_response,
+                                 token_error_response.get("status"))
         response = requests.get(url, json=body, headers=headers)
+        headers = dict(response.headers)
         logging.info(f"USERS | GET | {url}")
-        return make_response(self.getResponseJson(response),
-                             response.status_code)
+        response = make_response(self.getResponseJson(response),
+                                 response.status_code)
+        response.headers[TOKEN_FIELD_NAME] = headers.get(TOKEN_FIELD_NAME)
+        return response
 
     def post(self, url, body, headers, query_params):
-        # if not (url.startswith("login")):
-        #     body, error = process_header(headers, body)
-        #     if error:
-        #         return make_response(body, body.get("status"))
+        if not (url.startswith("login")):
+            token_error_response = process_header(headers)
+            if token_error_response:
+                return make_response(token_error_response,
+                                     token_error_response.get("status"))
         response = requests.post(f"{self.host}{url}"
                                  f"{get_query_params(query_params)}",
                                  json=body,
@@ -86,19 +93,30 @@ class Users:
         return response
 
     def patch(self, url, body, headers, query_params):
-        response = requests.patch(f"{self.host}{url}"
-                                  f"{get_query_params(query_params)}",
-                                  json=body,
-                                  headers=headers)
+        url = f"{self.host}{url}{get_query_params(query_params)}"
+        token_error_response = process_header(headers)
+        if token_error_response:
+            return make_response(token_error_response,
+                                 token_error_response.get("status"))
+        response = requests.patch(url, json=body, headers=headers)
         logging.info(f"USERS | PATCH | {url}")
         logging.debug(f"BODY: {body}")
-        return make_response(self.getResponseJson(response),
-                             response.status_code)
+        headers = dict(response.headers)
+        response = make_response(self.getResponseJson(response),
+                                 response.status_code)
+        response.headers[TOKEN_FIELD_NAME] = headers.get(TOKEN_FIELD_NAME)
+        return response
 
     def delete(self, url, body, headers, query_params):
-        response = requests.delete(f"{self.host}{url}"
-                                   f"{get_query_params(query_params)}",
-                                   headers=headers)
+        token_error_response = process_header(headers)
+        if token_error_response:
+            return make_response(token_error_response,
+                                 token_error_response.get("status"))
+        url = f"{self.host}{url}{get_query_params(query_params)}"
+        response = requests.delete(url, headers=headers)
         logging.info(f"USERS | DELETE | {url}")
-        return make_response(self.getResponseJson(response),
-                             response.status_code)
+        headers = dict(response.headers)
+        response = make_response(self.getResponseJson(response),
+                                 response.status_code)
+        response.headers[TOKEN_FIELD_NAME] = headers.get(TOKEN_FIELD_NAME)
+        return response
