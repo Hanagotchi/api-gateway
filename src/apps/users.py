@@ -113,8 +113,9 @@ class Users:
             return make_response(token_error_response,
                                  token_error_response.get("status"))
         url = f"{self.host}{url}{get_query_params(query_params)}"
-        response = requests.delete(url, headers=headers)
+        response = requests.delete(url, json=body, headers=headers)
         logging.info(f"USERS | DELETE | {url}")
+        logging.debug(f"BODY: {body}")
         headers = dict(response.headers)
         response = make_response(self.getResponseJson(response),
                                  response.status_code)
