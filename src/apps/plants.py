@@ -51,7 +51,9 @@ class Plants:
     def delete(self, url, body, headers, query_params):
         response = requests.delete(f"{self.host}{url}"
                                    f"{get_query_params(query_params)}",
+                                   json=body,
                                    headers=headers)
         logging.info(f"PLANTS | DELETE | {url}")
+        logging.debug(f"BODY: {body}")
         return make_response(self.getResponseJson(response),
                              response.status_code)
